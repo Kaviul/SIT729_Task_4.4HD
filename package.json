@@ -1,0 +1,18 @@
+{
+  "name": "node-codes",
+  "version": "1.0.0",
+  "description": "SIT729_4.4HD",
+  "main": "iotsensor.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node iotsensor.js"
+  },
+  "author": "MD KAVIUL HOSSAIN",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^6.0.0",
+    "plotly": "^1.0.6",
+    "serialport": "^11.0.1"
+  }
+}
