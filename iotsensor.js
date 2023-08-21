@@ -108,7 +108,7 @@ try{
            // console.log("Start-time: ", time);
            // console.log("Time elapsed: ", elapsed, "sec");
 
-           db.collection("data").aggregate([
+           db.collection("sensor_data_4.4hd").aggregate([
             // First Stage
             {
               $bucket: {
