@@ -14,10 +14,6 @@ const dataSchema = new Schema({
     time: {
         type: Date
     },
-    // temperature: {
-    //     type: Number
-
-    // },
 
     sensorData: {
         type: String
@@ -28,6 +24,6 @@ const dataSchema = new Schema({
 
 
 
-const Sensor = mongoose.model('Sensor_Data_4.4HD', dataSchema)
+const Sensor = mongoose.model('data', dataSchema)
 module.exports = Sensor
 
