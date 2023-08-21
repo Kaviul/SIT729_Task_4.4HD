@@ -13,46 +13,69 @@ var data =
 {
 x: [],
 y: [],
-type: "scatter"
+type: "scatter",
+name:"Database"
 };
 
 
+//MongoDB Connection
+
+try{
+    mongoose.connect(url, {useUnifiedTopology: true},
+        () => console.log("Mongoose connected"),
+        );
+    } catch (e) {
+        console.log("Mongoose not connected!");
+    }
+
+    const db = mongoose.connection
+    
+    db.on('error', (err) => {
+        console.log(err)
+    })
+    
+    db.once('open', () => {
+        console.log("Database Connection Established!");
+        //setInterval(() => sensortest(data), 10000);
+
+        // try{
+        //     db.collection('data').updateOne({
+        //         id: 0,
+        //         name: "temperaturesensor",
+        //         address: "221 Burwood Hwy, Burwood VIC 3125"
+            
+        //     }, {
+        //         $push : {
+        
+        //             time: {$each: ["check 1" ,"check2" ,"check3"]}
+                       
+        //         }
+      
+        //     }), () => console.log ("Mongo push worked!")
+        //     } catch (e) {
+        //         console.log("Mongoose push not working!");
+        //     }
+
+        
+    })
+   
+    
+
 setInterval(sensortest, 10000);
 
-function sensortest(){
-
-    //MongoDB Connection
-
-    try{
-        mongoose.connect(url, {useUnifiedTopology: true},
-            () => console.log("Mongoose connected"),
-            );
-        } catch (e) {
-            console.log("Mongoose not connected!");
-        }
-        const db1 = mongoose.connection
-        
-        db1.on('error', (err) => {
-            console.log(err)
-        })
-        
-        db1.once('open', () => {
-            console.log("Database Connection Established!")
-        })
-
+  function sensortest(data){
 
 
     //Sensor Data
 
     const iotData = fs.readFileSync("E:/Deakin Uni/S779/Trimester 2 (2023)/SIT729/Task 4/sensorData_4.4HD.txt").toString('utf-8')
     //console.log(iotData);
-
+try{
     const sensordata = {
         id: 0,
         name: "temperaturesensor",
         address: "221 Burwood Hwy, Burwood VIC 3125",
         time: Date.now(),
-        //temperature: 20,
         sensorData: iotData
         }
     
@@ -69,38 +92,54 @@ function sensortest(){
         name: sensordata.name,
         address: sensordata.address,
         time: sensordata.time,
-        //temperature: sensordata.temperature,
         sensorData: sensordata.sensorData
         });
 
-        newSensor.save().then(doc => {
-            // for (i=0; i<=10; i++)
-            // {
-            // time = sensordata.time;
-            // endtime = Date.now();
-            // elapsed = ((endtime-time)/1000);
-            // console.log(doc);
-            // console.log("Start-time: ", time);
-            // console.log("Time elapsed: ", elapsed, "sec");
-            // }
+        
 
-            //time = sensordata.time;
+        newSensor.save().then(doc => {
+    
+            time = sensordata.time;
+            console.log(doc);
             //endtime = Date.now();
             //elapsed = ((endtime-time)/1000);
-            console.log(doc);
-            time = sensordata.time;
+            
+            //time = sensordata.time;
            // console.log("Start-time: ", time);
            // console.log("Time elapsed: ", elapsed, "sec");
 
-           Sensor.findOneAndUpdate({
-            name: "temperaturesensor",
+           db.collection("data").aggregate([
+            // First Stage
+            {
+              $bucket: {
+                groupBy: "$time",                        // Field to group by
+                output: {                                     // Output for each bucket
+                  "id": 0,
+                  "name": "temperaturesensor",
+                  "address" : "221 Burwood Hwy, Burwood VIC 3125",
+
+                  "sensor_data" :
+                    {
+                      $push: {
+                        "time": "$time",
+                        "sensorData": "$sensorData"
+                      }
+                    }
+                }
+              }
+            },
+           // Second Stage
+            // {
+            //   $match: { count: {$gt: 3} }
+            // }
+          ] )
+           
+    
+            
+
         
-        }, {
-            $push : {
-                time: sensordata.time,
-                sensorData: sensordata.sensorData
-            }
-        })
+          
+          
 
        //Data Push to Plotly-MongoDb
 
@@ -113,15 +152,20 @@ function sensortest(){
         console.log(msg);
         });
 
-
-       
-            
-    
-
         }).then(() => {
         //mongoose.connection.close();
         console.log("MongoDB still open");
         });
 
+    } catch (error) {
+        console.error('Error in sensortest:', error);
+        //mongoose2.close(); // Close the Service 2 MongoDB connection 
+      } 
+
+      
+      
+    
+      
+      
 }
 
